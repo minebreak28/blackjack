@@ -23,6 +23,8 @@ public class BlackjackCardCounting {
     private static ArrayList<String> shoe;
     private static int               runningCount = 0;
 
+    private static double[][]        results      = new double[1000][5];
+
     /**
      * Initializes a shoe of 8 decks of cards, each containing 52 individual
      * cards, and then shuffling randomly
@@ -248,14 +250,7 @@ public class BlackjackCardCounting {
 
     }
 
-    /**
-     * Main function for the game
-     *
-     * @param args
-     *            arguments
-     */
-    public static void main ( final String[] args ) {
-
+    public static void play1000Hands () {
         shoe = initializeShoe();
         String cardAdded;
 
@@ -384,16 +379,41 @@ public class BlackjackCardCounting {
             }
 
         }
-        System.out.println( "Dealer wins: " + dealerWins );
-        System.out.println( "Player wins: " + playerWins );
-        System.out.println( "Pushes: " + push );
-        System.out.println( "The player gambled a total of " + playerBets + " dollars." );
-        if ( playerProfit >= 0 ) {
-            System.out.println( "The player made a net profit of: " + playerProfit + " dollars." );
-        }
-        else {
-            System.out.println( "The player made a net loss of: " + ( playerProfit * -1 ) + " dollars." );
+    }
 
+    /**
+     * Main function for the game
+     *
+     * @param args
+     *            arguments
+     */
+    public static void main ( final String[] args ) {
+
+        for ( int i = 0; i < 1000; i++ ) {
+            play1000Hands();
+            results[i][0] = dealerWins;
+            results[i][1] = playerWins;
+            results[i][2] = push;
+            results[i][3] = playerBets;
+            results[i][4] = playerProfit;
+            System.out.println( "Dealer wins: " + results[i][0] );
+            System.out.println( "Player wins: " + results[i][1] );
+            System.out.println( "Pushes: " + results[i][2] );
+            System.out.println( "The player gambled a total of " + results[i][3] + " dollars." );
+            if ( playerProfit >= 0 ) {
+                System.out.println( "The player made a net profit of: " + results[i][4] + " dollars." );
+            }
+            else {
+                System.out.println( "The player made a net loss of: " + ( results[i][4] * -1 ) + " dollars." );
+
+            }
+            dealerWins = 0;
+            playerWins = 0;
+            push = 0;
+            playerBets = 0;
+            playerProfit = 0;
+            shoeIndex = 0;
+            runningCount = 0;
         }
 
     }
