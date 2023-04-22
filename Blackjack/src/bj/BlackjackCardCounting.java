@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -429,36 +431,76 @@ public class BlackjackCardCounting {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet spreadsheet = workbook.createSheet( " Card Counting Data " );
         XSSFRow row;
+        Font font = workbook.createFont();
+        font.setBold( true );
         Map<String, Object[]> studentData = new TreeMap<String, Object[]>();
 
         studentData.put( "1",
                 new Object[] { "Round", "Dealer Wins", "Player Wins", "Pushes", "Total Bet", "Net Profit" } );
 
-        for ( int i = 0; i < 1000; i++ ) {
-            studentData.put( Integer.toString( i ),
-                    new Object[] { i + 1, results[i][0], results[i][1], results[i][2], results[i][3], results[i][4] } );
-        }
-        Set<String> keyid = studentData.keySet();
+        double totalProfit = 0;
+        double averageProfit = 0;
+        double averageWinPercent = 0;
+        double averageLossPercent = 0;
+        double averagePushPercent = 0;
+        double dealerTotalWin = 0;
+        double playerTotalWin = 0;
+        double totalPush = 0;
+        double totalPlays = 0;
+        for ( int index = 0; index < 1000; index++ ) {
+            String i = Integer.toString( index + 1 );
 
-        int rowid = 0;
+            // Let's add to the total bet amount
+            // totalBet += results[index][3];
+            // Let's add to dealer total win, player total win, and total plays.
+            dealerTotalWin += results[index][0];
+            playerTotalWin += results[index][1];
+            totalPush += results[index][2];
+            // Let's add to the total profit
+            totalProfit += results[index][4];
+
+            studentData.put( Integer.toString( index + 2 ), new Object[] { i, results[index][0], results[index][1],
+                    results[index][2], results[index][3], results[index][4] } );
+        }
+        // Calculate total plays
+        totalPlays = dealerTotalWin + playerTotalWin + totalPush;
+        // Calculate average percentage of win, loss, and push
+        averageWinPercent = playerTotalWin / totalPlays;
+        averageLossPercent = dealerTotalWin / totalPlays;
+        averagePushPercent = totalPush / totalPlays;
+        // Calculate Average profit
+        averageProfit = totalProfit / 1000;
+
+        studentData.put( "1002", new Object[] { "Average Win Percentage:", averageWinPercent } );
+        studentData.put( "1003", new Object[] { "Average Loss Percentage:", averageLossPercent } );
+        studentData.put( "1004", new Object[] { "Average Push Percentage:", averagePushPercent } );
+        studentData.put( "1005", new Object[] { "Average Profit:", averageProfit } );
+
+        Set<String> keyid = studentData.keySet();
 
         // writing the data into the sheets...
 
         for ( String key : keyid ) {
 
-            row = spreadsheet.createRow( rowid++ );
+            row = spreadsheet.createRow( Integer.parseInt( key ) - 1 );
             Object[] objectArr = studentData.get( key );
             int cellid = 0;
 
             for ( Object obj : objectArr ) {
+                CellStyle style = workbook.createCellStyle();
                 Cell cell = row.createCell( cellid++ );
-                cell.setCellValue( (String) obj );
+                cell.setCellValue( obj.toString() );
+                if ( Integer.parseInt( key ) >= 1002 ) {
+                    style.setFont( font );
+                    cell.setCellStyle( style );
+                }
+
             }
         }
 
         // .xlsx is the format for Excel Sheets...
         // writing the workbook into the file...
-        FileOutputStream out = new FileOutputStream( new File( "datasets/ccDataset.xlsx" ) );
+        FileOutputStream out = new FileOutputStream( new File( "datasets\\ccDataset.xlsx" ) );
 
         workbook.write( out );
         workbook.close();
