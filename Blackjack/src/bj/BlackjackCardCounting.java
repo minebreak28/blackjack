@@ -1,7 +1,17 @@
 package bj;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Blackjack using basic strategy, but also implements Hi-Lo system for card
@@ -387,7 +397,7 @@ public class BlackjackCardCounting {
      * @param args
      *            arguments
      */
-    public static void main ( final String[] args ) {
+    public static void main ( final String[] args ) throws Exception {
 
         for ( int i = 0; i < 1000; i++ ) {
             play1000Hands();
@@ -415,6 +425,44 @@ public class BlackjackCardCounting {
             shoeIndex = 0;
             runningCount = 0;
         }
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet spreadsheet = workbook.createSheet( " Card Counting Data " );
+        XSSFRow row;
+        Map<String, Object[]> studentData = new TreeMap<String, Object[]>();
+
+        studentData.put( "1",
+                new Object[] { "Round", "Dealer Wins", "Player Wins", "Pushes", "Total Bet", "Net Profit" } );
+
+        for ( int i = 0; i < 1000; i++ ) {
+            studentData.put( Integer.toString( i ),
+                    new Object[] { i + 1, results[i][0], results[i][1], results[i][2], results[i][3], results[i][4] } );
+        }
+        Set<String> keyid = studentData.keySet();
+
+        int rowid = 0;
+
+        // writing the data into the sheets...
+
+        for ( String key : keyid ) {
+
+            row = spreadsheet.createRow( rowid++ );
+            Object[] objectArr = studentData.get( key );
+            int cellid = 0;
+
+            for ( Object obj : objectArr ) {
+                Cell cell = row.createCell( cellid++ );
+                cell.setCellValue( (String) obj );
+            }
+        }
+
+        // .xlsx is the format for Excel Sheets...
+        // writing the workbook into the file...
+        FileOutputStream out = new FileOutputStream( new File( "datasets/ccDataset.xlsx" ) );
+
+        workbook.write( out );
+        workbook.close();
+        out.close();
 
     }
 
