@@ -1,7 +1,19 @@
 package bj;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Blackjack using basic strategy only
@@ -18,6 +30,7 @@ public class BlackjackBasicStrategy {
     private static int               push         = 0;
     private static int               shoeIndex    = 0;
     private static ArrayList<String> shoe;
+    private static double[][]        results      = new double[1000][5];
 
     /**
      * Initializes a shoe of 8 decks of cards, each containing 52 individual
@@ -196,14 +209,7 @@ public class BlackjackBasicStrategy {
         }
     }
 
-    /**
-     * Main function for the game
-     *
-     * @param args
-     *            arguments
-     */
-    public static void main ( final String[] args ) {
-
+    public static void play1000Hands () {
         shoe = initializeShoe();
 
         // Plays 1000 hands of blackjack to basic strategy
@@ -311,17 +317,119 @@ public class BlackjackBasicStrategy {
             }
 
         }
-        System.out.println( "Dealer wins: " + dealerWins );
-        System.out.println( "Player wins: " + playerWins );
-        System.out.println( "Pushes: " + push );
-        System.out.println( "The player gambled a total of " + playerBets + " dollars." );
-        if ( playerProfit >= 0 ) {
-            System.out.println( "The player made a net profit of: " + playerProfit + " dollars." );
-        }
-        else {
-            System.out.println( "The player made a net loss of: " + ( playerProfit * -1 ) + " dollars." );
+    }
 
+    /**
+     * Main function for the game
+     *
+     * @param args
+     *            arguments
+     */
+    public static void main ( final String[] args ) throws Exception {
+
+        for ( int i = 0; i < 1000; i++ ) {
+            play1000Hands();
+            results[i][0] = dealerWins;
+            results[i][1] = playerWins;
+            results[i][2] = push;
+            results[i][3] = playerBets;
+            results[i][4] = playerProfit;
+            System.out.println( "Dealer wins: " + results[i][0] );
+            System.out.println( "Player wins: " + results[i][1] );
+            System.out.println( "Pushes: " + results[i][2] );
+            System.out.println( "The player gambled a total of " + results[i][3] + " dollars." );
+            if ( playerProfit >= 0 ) {
+                System.out.println( "The player made a net profit of: " + results[i][4] + " dollars." );
+            }
+            else {
+                System.out.println( "The player made a net loss of: " + ( results[i][4] * -1 ) + " dollars." );
+
+            }
+            dealerWins = 0;
+            playerWins = 0;
+            push = 0;
+            playerBets = 0;
+            playerProfit = 0;
+            shoeIndex = 0;
         }
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet spreadsheet = workbook.createSheet( " Basic Strategy Data " );
+        XSSFRow row;
+        Font font = workbook.createFont();
+        font.setBold( true );
+        Map<String, Object[]> studentData = new TreeMap<String, Object[]>();
+
+        studentData.put( "1",
+                new Object[] { "Round", "Dealer Wins", "Player Wins", "Pushes", "Total Bet", "Net Profit" } );
+
+        double totalProfit = 0;
+        double averageProfit = 0;
+        double averageWinPercent = 0;
+        double averageLossPercent = 0;
+        double averagePushPercent = 0;
+        double dealerTotalWin = 0;
+        double playerTotalWin = 0;
+        double totalPush = 0;
+        double totalPlays = 0;
+        for ( int index = 0; index < 1000; index++ ) {
+            String i = Integer.toString( index + 1 );
+
+            // Let's add to the total bet amount
+            // totalBet += results[index][3];
+            // Let's add to dealer total win, player total win, and total plays.
+            dealerTotalWin += results[index][0];
+            playerTotalWin += results[index][1];
+            totalPush += results[index][2];
+            // Let's add to the total profit
+            totalProfit += results[index][4];
+
+            studentData.put( Integer.toString( index + 2 ), new Object[] { i, results[index][0], results[index][1],
+                    results[index][2], results[index][3], results[index][4] } );
+        }
+        // Calculate total plays
+        totalPlays = dealerTotalWin + playerTotalWin + totalPush;
+        // Calculate average percentage of win, loss, and push
+        averageWinPercent = playerTotalWin / totalPlays;
+        averageLossPercent = dealerTotalWin / totalPlays;
+        averagePushPercent = totalPush / totalPlays;
+        // Calculate Average profit
+        averageProfit = totalProfit / 1000;
+
+        studentData.put( "1002", new Object[] { "Average Win Percentage:", averageWinPercent } );
+        studentData.put( "1003", new Object[] { "Average Loss Percentage:", averageLossPercent } );
+        studentData.put( "1004", new Object[] { "Average Push Percentage:", averagePushPercent } );
+        studentData.put( "1005", new Object[] { "Average Profit:", averageProfit } );
+
+        Set<String> keyid = studentData.keySet();
+
+        // writing the data into the sheets...
+
+        for ( String key : keyid ) {
+
+            row = spreadsheet.createRow( Integer.parseInt( key ) - 1 );
+            Object[] objectArr = studentData.get( key );
+            int cellid = 0;
+
+            for ( Object obj : objectArr ) {
+                CellStyle style = workbook.createCellStyle();
+                Cell cell = row.createCell( cellid++ );
+                cell.setCellValue( obj.toString() );
+                if ( Integer.parseInt( key ) >= 1002 ) {
+                    style.setFont( font );
+                    cell.setCellStyle( style );
+                }
+
+            }
+        }
+
+        // .xlsx is the format for Excel Sheets...
+        // writing the workbook into the file...
+        FileOutputStream out = new FileOutputStream( new File( "datasets\\bsDataset.xlsx" ) );
+
+        workbook.write( out );
+        workbook.close();
+        out.close();
 
     }
 
