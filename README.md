@@ -22,3 +22,4 @@ There are four jar files attached in github that you can download into the class
 
 4.	blackjack_data.xlsx is a combination of bsDataset.xlsx and ccDataset.xlsx. bsDataset.xlsx is the dataset of 1000 rounds of blackjack using only basic strategy, while ccDataset.xlsx is the dataset of 1000 rounds of blackjack using basic strategy and card counting to decide how much to bet.
 
+5. project.ipynb is the jupiter notebook where the dataset is loaded in and perform machine learning techniques for analysis.
