@@ -3,6 +3,7 @@ In the zip folder, you will see the following files:
 
 
 1.	BlackjackBasicStrategy.java and BlackjackCardCounting.java: These program will play 1000 rounds of 1000 hands of blackjack using basic strategy and card counting, respectively, and then print out results onto an Excel worksheet. Note that the functionality to print out to excel sheets stem from the org.apache.poi.xssf imports, which only work if the program is run in Eclipse and has an abundance of jar files installed in the classpath:
+
 ![image](https://user-images.githubusercontent.com/78050276/234165251-94070c53-350b-42a2-b3a5-c369fcae48a9.png)
 These files will be included in the zip file as well and can be downloaded if you would like to test our code out. Furthermore, our code uses the JRE System Library [JavaSE-11] to compile and use certain syntax and methods.
 
