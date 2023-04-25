@@ -14,7 +14,7 @@ In the zip folder, you will see the following files:
 
 ![image](https://user-images.githubusercontent.com/78050276/234165251-94070c53-350b-42a2-b3a5-c369fcae48a9.png)
 
-Furthermore, our code uses the JRE System Library [JavaSE-11] to compile and use certain syntax and methods.
+There are four jar files attached in github that you can download into the classpath of your eclipse project if you wish to test our code out to reproduce the datasets. Furthermore, our code uses the JRE System Library [JavaSE-11] to compile and use certain syntax and methods.
 
 
 2.	blackjackTest.java is a simple Junit test case that tests some basic methods in the two main source code. Please install Junit 5 into Eclipse if you wish to run these tests.
